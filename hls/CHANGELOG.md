@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.0-dev
+* Update deps [#340](https://github.com/jellyfish-dev/membrane_rtc_engine/pull/340)
+
 ## 0.4.0-dev
 * Update to Membrane Core 1.0 [#331](https://github.com/jellyfish-dev/membrane_rtc_engine/pull/331)
 * Update Membrane Video Compositor dependency [#338](https://github.com/jellyfish-dev/membrane_rtc_engine/pull/338)
