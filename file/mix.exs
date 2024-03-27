@@ -54,6 +54,7 @@ defmodule Membrane.RTC.Engine.Endpoint.File.MixProject do
 
       # Regular deps
       {:membrane_core, "~> 1.0"},
+      {:membrane_hackney_plugin, "~> 0.11.0"},
       {:membrane_realtimer_plugin, "~> 0.9.0"},
       {:membrane_file_plugin, "~> 0.16.0"},
       {:membrane_opus_plugin, "~> 0.19.3"},

@@ -30,8 +30,8 @@ defmodule Membrane.RTC.Engine.Endpoint.File do
                 description: "Pid of parent Engine"
               ],
               file_path: [
-                spec: Path.t(),
-                description: "Path to track file"
+                spec: binary() | Path.t(),
+                description: "A URL or Path to the track file"
               ],
               track_config: [
                 spec: TrackConfig.t(),
@@ -249,7 +249,7 @@ defmodule Membrane.RTC.Engine.Endpoint.File do
 
   defp build_pipeline_ogg_demuxer(state) do
     spec = [
-      child(:source, %Membrane.File.Source{location: state.file_path})
+      get_pipeline_source(state)
       |> child(:ogg_demuxer, Membrane.Ogg.Demuxer)
     ]
 
@@ -258,7 +258,7 @@ defmodule Membrane.RTC.Engine.Endpoint.File do
 
   defp build_full_pipeline(state, pad) do
     spec = [
-      child(:source, %Membrane.File.Source{location: state.file_path})
+      get_pipeline_source(state)
       |> then(&state.after_source_transformation.(&1))
       |> then(get_parser(state.track))
       |> then(get_rest_of_pipeline(state, pad))
@@ -294,6 +294,23 @@ defmodule Membrane.RTC.Engine.Endpoint.File do
         wait_for_keyframe_request?: state.playback_mode == :wait_for_first_subscriber
       })
       |> bin_output(pad)
+    end
+  end
+
+  defp get_pipeline_source(%{file_path: source} = _state) do
+    case URI.new(source) do
+      {:ok, %URI{scheme: scheme, host: host}}
+      when is_binary(host) and scheme in ["http", "https"] ->
+        child(:source, %Membrane.Hackney.Source{
+          location: source,
+          hackney_opts: [follow_redirect: true]
+        })
+
+      {:ok, %URI{host: nil, path: path}} when is_binary(path) ->
+        child(:source, %Membrane.File.Source{location: source})
+
+      _ ->
+        raise "Unsupported file path: #{inspect(source)}"
     end
   end
 

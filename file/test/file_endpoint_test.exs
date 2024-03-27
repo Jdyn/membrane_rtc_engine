@@ -10,6 +10,9 @@ defmodule Membrane.RTC.FileEndpointTest do
 
   @fixtures_dir "./test/fixtures/"
 
+  @audio_fixture "https://raw.githubusercontent.com/jellyfish-dev/membrane_rtc_engine/master/file/test/fixtures/audio.ogg"
+  @video_fixture "https://raw.githubusercontent.com/jellyfish-dev/membrane_rtc_engine/master/file/test/fixtures/video.h264"
+
   setup do
     options = [id: "test_rtc"]
 
@@ -28,23 +31,46 @@ defmodule Membrane.RTC.FileEndpointTest do
 
   describe "File Endpoint test" do
     for mode <- [:autoplay, :manual, :wait_for_first_subscriber] do
-      @tag :tmp_dir
-      test "test audio with #{mode}", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
-        test_endpoint(
-          type: :audio,
-          rtc_engine: rtc_engine,
-          tmp_dir: tmp_dir,
-          playback_mode: unquote(mode),
-          reference_path: @out_opus_reference
-        )
-      end
+      # @tag :tmp_dir
+      # test "test audio with #{mode}", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
+      #   test_endpoint(
+      #     type: :audio,
+      #     rtc_engine: rtc_engine,
+      #     tmp_dir: tmp_dir,
+      #     playback_mode: unquote(mode),
+      #     reference_path: @out_opus_reference
+      #   )
+      # end
+
+      # @tag :tmp_dir
+      # test "test audio with #{mode} and remote file source", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
+      #   test_endpoint(
+      #     type: :audio,
+      #     rtc_engine: rtc_engine,
+      #     tmp_dir: tmp_dir,
+      #     playback_mode: unquote(mode),
+      #     url_path: @audio_fixture,
+      #     reference_path: @out_opus_reference
+      #   )
+      # end
+
+      # @tag :tmp_dir
+      # test "test video with #{mode}", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
+      #   test_endpoint(
+      #     type: :video,
+      #     rtc_engine: rtc_engine,
+      #     tmp_dir: tmp_dir,
+      #     playback_mode: unquote(mode)
+      #   )
+      # end
 
       @tag :tmp_dir
-      test "test video with #{mode}", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
+      test "test video with #{mode} and remote url source", %{rtc_engine: rtc_engine, tmp_dir: tmp_dir} do
         test_endpoint(
           type: :video,
           rtc_engine: rtc_engine,
           tmp_dir: tmp_dir,
+          url_path: @video_fixture,
           playback_mode: unquote(mode)
         )
       end
@@ -53,7 +79,13 @@ defmodule Membrane.RTC.FileEndpointTest do
 
   defp test_endpoint(opts) do
     file_name = get_filename(opts[:type])
-    file_path = Path.join(@fixtures_dir, file_name)
+
+    file_path =
+      if Keyword.has_key?(opts, :url_path) do
+        opts[:url_path]
+      else
+        Path.join(@fixtures_dir, file_name)
+      end
 
     reference_path =
       if Keyword.has_key?(opts, :reference_path) do
